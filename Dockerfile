@@ -13,7 +13,8 @@
 #-----------------------------------------------------------------------------------
 # Base image
 # We need use JDK, JRE is not enough as Liferay do runtime changes and require javac
-FROM eclipse-temurin:11-jdk-jammy AS base
+FROM eclipse-temurin:11-jdk-focal AS base
+# FROM eclipse-temurin:11-jdk-jammy AS base
 
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
@@ -84,10 +85,13 @@ ENTRYPOINT [ "/bin/bash" ]
 
 #--------------------------------------------------------------------------------------------------
 # Thrift
-FROM ubuntu:jammy AS sw360thriftbuild
+# FROM ubuntu:jammy AS sw360thriftbuild
+FROM ubuntu:focal AS sw360thriftbuild
 
 ARG BASEDIR="/build"
 ARG THRIFT_VERSION
+
+RUN apt-get update --fix-missing
 
 RUN --mount=type=cache,target=/var/cache/apt \
     apt-get -qq update \
@@ -117,7 +121,8 @@ COPY --from=sw360thriftbuild /usr/local/bin/thrift /usr/local/bin/thrift
 # So when decide to use as development, only this last stage
 # is triggered by buildkit images
 
-FROM maven:3.9-eclipse-temurin-11 as sw360build
+# FROM maven:3.9-eclipse-temurin-11 as sw360build
+FROM maven:3.9-eclipse-temurin-11-focal as sw360build
 
 ARG COUCHDB_HOST=localhost
 
@@ -139,7 +144,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
     zip \
     unzip \
     && rm -rf /var/lib/apt/lists/* \
-    && pip install mkdocs-material
+    && pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org mkdocs-material 
 
 # Prepare maven from binary to avoid wrong java dependencies and proxy
 COPY scripts/docker-config/mvn-proxy-settings.xml /etc
