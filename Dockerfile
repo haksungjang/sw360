@@ -144,7 +144,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
     zip \
     unzip \
     && rm -rf /var/lib/apt/lists/* \
-    && pip install mkdocs-material
+    && pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org mkdocs-material 
 
 # Prepare maven from binary to avoid wrong java dependencies and proxy
 COPY scripts/docker-config/mvn-proxy-settings.xml /etc
